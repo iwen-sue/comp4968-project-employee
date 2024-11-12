@@ -68,6 +68,8 @@ interface Project {
 
 const days: (keyof DayHours)[] = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
 
+const API_URL = import.meta.env.PROD ? "" : "http://localhost:5001";
+
 const transformTSToJSON = (data: TimesheetEntry): Record<string, any> => {
   const dataToStore = {
     id: data.id,
@@ -113,7 +115,7 @@ const addProjectToDatabase = async (entry: TimesheetEntry): Promise<void> => {
   console.log("Added project:", data);
 
   try {
-    const response = await fetch('https://ifyxhjgdgl.execute-api.us-west-2.amazonaws.com/test/timesheet', {
+    const response = await fetch(`${API_URL}/api/timesheet`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -157,7 +159,7 @@ const fetchProjectData = async (): Promise<Project[]> => {
 const fetchTimesheetData = async (employee_id: string, currentWeekStart: Date): Promise<TimesheetEntry[]> => {
   try {
     const response = await fetch(
-      `https://ifyxhjgdgl.execute-api.us-west-2.amazonaws.com/test/timesheet?employee_id=${employee_id}&start_date_of_the_week=${format(currentWeekStart, 'yyyy-MM-dd')}`
+      `${API_URL}/api/timesheet?employee_id=${employee_id}&start_date_of_the_week=${format(currentWeekStart, 'yyyy-MM-dd')}`
     );
     const data = await response.json();
     console.log("Fetched data:", data);
@@ -184,7 +186,7 @@ const addOrUpdateTimeRecord = async (timeRecord: TimeRecord): Promise<void> => {
     end_time: timeRecord.end_time,
   };
   try {
-    const response = await fetch('https://ifyxhjgdgl.execute-api.us-west-2.amazonaws.com/test/timesheet/timerecord', {
+    const response = await fetch(`${API_URL}/api/timesheet-records`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -212,7 +214,7 @@ const submitTimesheet = async (timesheet: TimesheetEntry[]): Promise<void> => {
   });
   data.forEach(async (entry) => {
     try {
-      const response = await fetch('https://ifyxhjgdgl.execute-api.us-west-2.amazonaws.com/test/timesheet', {
+      const response = await fetch(`${API_URL}/api/timesheet/submit`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
