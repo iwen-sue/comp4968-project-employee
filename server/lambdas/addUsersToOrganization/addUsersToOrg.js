@@ -22,6 +22,7 @@ const addToOrgQuery = `
 `;
 /**
  * Finds a user in the database by email.
+ * 
  * @param {string} email - The user's email address
  * @returns {Promise<number|null>} - The user's ID or null if not found
  */
@@ -32,6 +33,7 @@ async function findUserInDatabaseByEmail(email) {
 
 /**
  * Checks if a user is already a member of an organization.
+ * 
  * @param {number} organizationId - The ID of the organization
  * @param {number} userId - The ID of the user
  * @returns {Promise<boolean>} - True if the user is a member, false otherwise
@@ -46,6 +48,7 @@ async function isUserInOrganization(organizationId, userId) {
 
 /**
  * Adds a user to an organization.
+ * 
  * @param {number} organizationId - The ID of the organization.
  * @param {number} userId - The ID of the user
  * @param {string} role - The role assigned to the user in the organization

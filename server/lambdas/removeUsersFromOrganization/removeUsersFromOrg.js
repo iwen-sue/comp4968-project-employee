@@ -14,6 +14,7 @@ SELECT 1 FROM deleted;
  * 
  * @param {*} organizationId - The ID of the organization.
  * @param {*} userId - The ID of the user
+ * @returns {Promise<number|null>} - 1 if successful or null if not
  */
 async function deleteUserFromOrganization(organizationId, userId) {
     const result = await pool.query(deleteQuery, [organizationId, userId]);
@@ -23,7 +24,7 @@ async function deleteUserFromOrganization(organizationId, userId) {
 
 /**
  * Exported lambda function handler for removing user(s) from organization.
- * Checks if there's an entry with a matching userId and the received organization Id, and deletes the entry from the table if they exist
+ * Checks if there's an entry with a matching userId and the received organization Id, and deletes the entry from the table if they exist.
  * 
  * @param {*} event - The Lambda event object
  * @returns {object} - The HTTP response
