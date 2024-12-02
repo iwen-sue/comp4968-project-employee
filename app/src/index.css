@@ -108,6 +108,10 @@
     background-color: var(--progress-bar);
   }
 
+  .rdp-root {
+    @apply text-black;
+  }
+
   body {
     @apply text-foreground;
   }
