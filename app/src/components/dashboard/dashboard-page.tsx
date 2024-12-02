@@ -12,6 +12,7 @@ import { ProjectAllocation } from "./project-allocation";
 import CreateProject from "@/components/project/create-project";
 import refreshTokens from "@/actions/refresh-token";
 import moment from "moment";
+import { useNavigate } from "react-router-dom";
 
 interface DashboardPageProps {
   onSignOut?: () => void;
@@ -99,6 +100,7 @@ export function DashboardPage({
   const [projectDetails, setProjectDetails] = useState<ProjectDetails[]>([]);
   const [hoursLast14Days, setHoursLast14Days] = useState<number>(0);
   const [hoursDifference, setHoursDifference] = useState<number>(0);
+  const navigate = useNavigate();
 
   const userId =
     sessionStorage.getItem("userId") ?? "5131efb8-4579-492d-97fd-49602e6ed513";
@@ -280,7 +282,7 @@ export function DashboardPage({
               </Button>
               <CreateProject />
               <Button
-                onClick={() => window.location.href = "/approve-timesheets"}
+                onClick={() => navigate("/approve-timesheets")}
                 className="flex items-center gap-2 bg-black px-4 py-2 rounded-md hover:bg-gray-200 transition"
               >
                 Approve Timesheets
