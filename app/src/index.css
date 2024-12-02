@@ -4,19 +4,53 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 0%;
-    --primary: 0 0% 0%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 0 0% 96%;
-    --secondary-foreground: 0 0% 0%;
-    --destructive: 0 0% 0%;
-    --destructive-foreground: 0 0% 100%;
-    --accent: 0 0% 0%;
-    --accent-foreground: 0 0% 100%;
+    --background: #FFFFFF;
+    --foreground: #1E202B;
+    --secondary-background: #F2F2F2; 
+    --primary: #333646;
+    --primary-foreground: #FFFFFF;
+    --secondary: #DBDBDC;
+    --secondary-foreground: #FFFFFF;
+    --destructive: #E9545b;
+    --destructive-foreground: #FFFFFF;
+    --accent: #f2f2f2;
+    --accent-foreground: #1E202B;
     --border: 0 0% 90%;
     --input: 0 0% 90%;
     --ring: 0 0% 0%;
+    --logo: #725CFF;
+    --progress: #F8CA00;
+    --line-approved:#45B7AF;
+    --line-estimated:#F8CA00;
+    --progress-bar: #A48AD5;
+
+    /* for project color */
+    --custom-red: #E9545b;
+    --custom-green: #45B7AF;
+    --custom-yellow: #F8CA00;
+    --custom-blue: #65C2DF;
+    --custom-purple: #A48AD5;
+  }
+
+  .dark {
+    --background: #28292B;
+    --foreground: #FFFFFF;
+    --secondary-background:#19191B;
+    --primary: #725CFF;
+    --primary-foreground: #FFFFFF;
+    --secondary: #878787;
+    --secondary-foreground: #FFFFFF;
+    --destructive: #E9545b;
+    --destructive-foreground: #FFFFFF;
+    --accent: #4E4F51;
+    --accent-foreground: #FFFFFF;
+    --border: 0 0% 0%;
+    --input: 0 0% 20%;
+    --ring: 0 0% 100%;
+    --progress: #E7f54a;
+    --line-approved:#725CFF;
+    --line-estimated:#E7f54a;
+    --progress-bar: #725CFF;
   }
 }
 
@@ -39,5 +73,46 @@
 
   .bg-gradient-custom {
     @apply bg-gradient-to-br from-black/5 via-gray-500/5 to-black/5;
+  }
+
+  .bg-custom-red {
+    background-color: var(--custom-red);
+    color: white;
+  }
+
+  .bg-custom-green {
+    background-color: var(--custom-green);
+    color: white;
+  }
+
+  .bg-custom-yellow {
+    background-color: var(--custom-yellow);
+    color: white;
+  }
+
+  .bg-custom-blue {
+    background-color: var(--custom-blue);
+    color: white;
+  }
+
+  .shadow-gray-950 {
+    --tw-shadow-color: #0c0c0d;
+    --tw-shadow: var(--tw-shadow-colored);
+  }
+
+  .progress-timeline {
+    background-color: var(--progress);
+  }
+
+  .progress-bar {
+    background-color: var(--progress-bar);
+  }
+
+  .rdp-root.bg-white {
+    @apply text-black;
+  }
+
+  body {
+    @apply text-foreground;
   }
 }

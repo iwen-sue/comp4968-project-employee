@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   startOfWeek,
@@ -31,9 +31,9 @@ const Loading = () => {
   return (
     <div className="flex justify-center items-center h-[500px]">
       <div className="space-y-2">
-        <Skeleton className="h-4 w-[250px]" />
-        <Skeleton className="h-4 w-[250px]" />
-        <Skeleton className="h-4 w-[250px]" />
+        <Skeleton className="h-4 w-[250px] bg-secondary" />
+        <Skeleton className="h-4 w-[250px] bg-secondary" />
+        <Skeleton className="h-4 w-[250px] bg-secondary" />
       </div>
     </div>
   );
@@ -267,7 +267,15 @@ type Project = {
   end_date: string | null;
 };
 
-function ManagerApprovalLayout({ pid }: { pid: string }) {
+type ManagerApprovalLayoutProps = {
+  pid: string;
+  notificationDate: Date | null;
+};
+
+function ManagerApprovalLayout({
+  pid,
+  notificationDate,
+}: ManagerApprovalLayoutProps) {
   const [currentWeekStart, setCurrentWeekStart] = useState<Date>(
     startOfWeek(new Date(), { weekStartsOn: 1 })
   );
@@ -278,6 +286,7 @@ function ManagerApprovalLayout({ pid }: { pid: string }) {
   );
   const [refetch, setRefetch] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const notificationDateRef = useRef<Date | null>(notificationDate);
 
   /* Week selector functions and constants */
   const today = new Date();
@@ -306,16 +315,30 @@ function ManagerApprovalLayout({ pid }: { pid: string }) {
     setRefetch((prev) => !prev);
   };
 
+  useEffect(() => {
+    if (notificationDateRef.current) {
+      setCurrentWeekStart(notificationDateRef.current);
+    }
+  }, []);
+
   // Fetch timesheet and records data of all employees for the current week
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
-      const timesheetsData = await fetchTimesheetData(pid, currentWeekStart);
+      const timesheetsData = await fetchTimesheetData(
+        pid,
+        notificationDateRef.current ?? currentWeekStart
+      );
       const timesheetAndRecordsData = await fetchTimeRecordData(timesheetsData);
       const hoursData = await fetchTrackedHoursData(timesheetAndRecordsData);
       setTrackedHours(hoursData);
       setTimesheets(timesheetAndRecordsData.map(transformTimesheet));
-      setTimeout(() => setIsLoading(false), 500);
+      setIsLoading(false);
+
+      if (notificationDateRef.current === currentWeekStart) {
+        notificationDateRef.current = null;
+        window.history.replaceState(null, "", "/approve-timesheets");
+      }
     };
 
     fetchData();
@@ -334,18 +357,16 @@ function ManagerApprovalLayout({ pid }: { pid: string }) {
   console.log(timesheets);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 rounded-lg shadow-md p-6 bg-background">
       <div className="flex justify-between mb-4">
         <div className="space-y-2">
-          <h1 className="text-3xl font-bold text-gradient">
-            {projectDetails?.name ?? ""}
-          </h1>
+          <h1 className="text-2xl font-bold">{projectDetails?.name ?? ""}</h1>
           {projectDetails && (
-            <h3 className="text-gradient">{`Start Date: ${
+            <p className="text-base">{`Start Date: ${
               projectDetails.start_date ?? "N/A"
             }, End Date: ${
               projectDetails.end_date ?? "N/A"
-            }, Estimated Hours: ${projectDetails.estimated_hours} Hours`}</h3>
+            }, Estimated Hours: ${projectDetails.estimated_hours} Hours`}</p>
           )}
         </div>
 
@@ -355,6 +376,7 @@ function ManagerApprovalLayout({ pid }: { pid: string }) {
             variant="outline"
             size="icon"
             onClick={handlePreviousWeek}
+            disabled={isLoading}
             aria-label="Previous week"
           >
             <ChevronLeft className="h-4 w-4" />
@@ -366,7 +388,7 @@ function ManagerApprovalLayout({ pid }: { pid: string }) {
             variant="outline"
             size="icon"
             onClick={handleNextWeek}
-            disabled={!isCurrentWeek}
+            disabled={!isCurrentWeek || isLoading}
             aria-label="Next week"
           >
             <ChevronRight className="h-4 w-4" />
@@ -377,10 +399,10 @@ function ManagerApprovalLayout({ pid }: { pid: string }) {
       {/* Tabs */}
       <Tabs defaultValue="timesheets" className="w-full">
         <TabsList className="w-full">
-          <TabsTrigger value="timesheets" className="hover:bg-gray-50 w-1/2">
+          <TabsTrigger value="timesheets" className="hover:bg-accent w-1/2">
             Timesheets
           </TabsTrigger>
-          <TabsTrigger value="approval" className="hover:bg-gray-50 w-1/2">
+          <TabsTrigger value="approval" className="hover:bg-accent w-1/2">
             Approval
           </TabsTrigger>
         </TabsList>

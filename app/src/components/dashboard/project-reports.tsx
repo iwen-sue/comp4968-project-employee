@@ -81,19 +81,19 @@ export function ProjectReports() {
   }, []);
 
   const getCompletionColor = (actual: number, estimated: number) => {
-    return actual > estimated ? '#ef4444' : '#000000';
+    return actual > estimated ? '#ef4444' : 'var(--custom-purple)';
   };
 
   const getProgressBarColor = (actual: number, estimated: number) => {
     return actual > estimated 
       ? 'bg-gradient-to-r from-red-600 to-red-800'
-      : 'bg-gradient-to-r from-black to-gray-800';
+      : 'progress-bar';
   };
 
   return (
-    <Card className="bg-white/10 border-0 min-w-screen flex flex-col h-full ">
+    <Card className="bg-background border-0 min-w-screen flex flex-col h-full dark:shadow-gray-950">
       <CardHeader>
-        <CardTitle className="text-xl font-semibold text-gradient">
+        <CardTitle className="text-xl font-semibold">
           Project Hours Overview
         </CardTitle>
       </CardHeader>
@@ -122,7 +122,7 @@ export function ProjectReports() {
               />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                  backgroundColor: 'rgba(255, 255, 255, 0.5)',
                   border: '1px solid #ccc'
                 }}
               />
@@ -130,7 +130,7 @@ export function ProjectReports() {
               <Bar 
                 dataKey="estimatedHours" 
                 name="Estimated Hours"
-                fill="#000000" 
+                fill="var(--custom-blue)" 
                 opacity={0.8}
               />
               <Bar 
@@ -148,7 +148,7 @@ export function ProjectReports() {
               <Bar 
                 dataKey="remainingHours" 
                 name="Remaining Hours"
-                fill="#cccccc"
+                fill="var(--custom-yellow)"
                 opacity={0.8}
               />
             </BarChart>
@@ -167,27 +167,27 @@ export function ProjectReports() {
               >
                 <div className="flex justify-between items-center">
                   <h3 className="font-medium">{report.projectName}</h3>
-                  <span className={`text-sm ${isOverallocated ? 'text-red-500 font-semibold' : 'text-gray-500'}`}>
+                  <span className={`text-sm ${isOverallocated ? 'text-red-500 font-semibold' : ''}`}>
                     {Math.round(completion)}% of Hour Budget
                   </span>
                 </div>
                 <div className="grid grid-cols-3 gap-4 text-sm">
                   <div>
-                    <div className="text-gray-500">Estimated</div>
+                    <div className="text-gray-500 dark:text-secondary">Estimated</div>
                     <div className="font-medium">{report.estimatedHours}h</div>
                   </div>
                   <div>
-                    <div className="text-gray-500">Actual</div>
+                    <div className="text-gray-500 dark:text-secondary">Actual</div>
                     <div className={`font-medium ${isOverallocated ? 'text-red-500' : ''}`}>
                       {report.actualHours}h
                     </div>
                   </div>
                   <div>
-                    <div className="text-gray-500">Remaining</div>
+                    <div className="text-gray-500 dark:text-secondary">Remaining</div>
                     <div className="font-medium">{report.remainingHours}h</div>
                   </div>
                 </div>
-                <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                <div className="w-full h-2 bg-gray-200 dark:bg-secondaryBackground rounded-full overflow-hidden">
                   <div
                     className={`h-full ${getProgressBarColor(report.actualHours, report.estimatedHours)}`}
                     style={{ 

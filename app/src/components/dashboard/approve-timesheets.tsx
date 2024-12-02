@@ -13,7 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { ManagerApprovalLayout } from "@/components/project/manager-approval-layout";
 import refreshTokens from "@/actions/refresh-token";
 
@@ -29,7 +29,7 @@ const fetchProjectDetails = async () => {
     const response = await fetch(`${API_URL}/test/project/manager/details`, {
       method: "POST",
       headers: {
-        "Authorization": accessToken,
+        Authorization: accessToken,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ id: sessionStorage.getItem("userId") }),
@@ -60,27 +60,27 @@ export function ApproveTimesheets() {
   const [selectedProject, setSelectedProject] = useState<string | null>(null);
   const [projects, setProjects] = useState<Project[]>([]);
   const navigate = useNavigate();
+  const { state } = useLocation();
+
+  console.log(state);
 
   useEffect(() => {
     const fetchData = async () => {
       const projectsData = await fetchProjectDetails();
       setProjects(projectsData);
     };
+    setSelectedProject(state?.projectId || null);
     fetchData();
   }, []);
 
   return (
-    <Card className="bg-white/10 border-0 min-h-screen">
+    <Card className="border-0 min-h-screen">
       <CardHeader>
         <div className="flex items-center gap-4 mb-6">
-          <Button
-            variant="outline"
-            onClick={() => navigate("/")}
-            className="bg-white/50"
-          >
+          <Button className="bg-background" variant="outline" onClick={() => navigate("/")}>
             Back to Dashboard
           </Button>
-          <CardTitle className="text-3xl font-bold text-gradient">
+          <CardTitle className="text-3xl font-bold">
             Approve Timesheets
           </CardTitle>
         </div>
@@ -91,10 +91,10 @@ export function ApproveTimesheets() {
             value={selectedProject || ""}
             onValueChange={setSelectedProject}
           >
-            <SelectTrigger className="w-full">
+            <SelectTrigger className="w-full dark:bg-secondary">
               <SelectValue placeholder="Select a project" />
             </SelectTrigger>
-            <SelectContent className="bg-white">
+            <SelectContent className="bg-secondary">
               {projects.map((project) => (
                 <SelectItem key={project.id} value={project.id}>
                   {project.name}
@@ -103,7 +103,12 @@ export function ApproveTimesheets() {
             </SelectContent>
           </Select>
         </div>
-        {selectedProject && <ManagerApprovalLayout pid={selectedProject} />}
+        {selectedProject && (
+          <ManagerApprovalLayout
+            pid={selectedProject}
+            notificationDate={state?.notificationDate}
+          />
+        )}
       </CardContent>
     </Card>
   );

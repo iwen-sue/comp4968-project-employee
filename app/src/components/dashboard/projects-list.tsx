@@ -40,12 +40,15 @@ export function ProjectsList({
   const [projects, setProjects] = useState<Project[]>([]);
 
   const fetchProjectData = async () => {
-    const tokenExpiry = parseInt(sessionStorage.getItem("tokenExpiry") || "0");
-    if (Date.now() > tokenExpiry) {
-      await refreshTokens();
-    }
-    const accessToken = sessionStorage.getItem("accessToken") || "";
     try {
+      // Refresh token if expired
+      const tokenExpiry = parseInt(sessionStorage.getItem("tokenExpiry") || "0");
+      if (Date.now() > tokenExpiry) {
+        await refreshTokens();
+      }
+      const accessToken = sessionStorage.getItem("accessToken") || "";
+
+      // Fetch project data from API
       const response = await fetch(`${API_URL}/test/project/manager`, {
         method: "POST",
         headers: {
@@ -62,18 +65,22 @@ export function ProjectsList({
       const data = await response.json();
       console.log("Project Data Response:", data);
 
+      // Map and transform the project data
       const mappedProjects = data.data.map((project: any) => {
-        const progress =
-          Math.round((project.approved_hours / project.estimated_hours) * 100);
+        const estimatedHours = project.estimated_hours || 0;
+        const approvedHours = project.approved_hours || 0;
+        const progress = estimatedHours > 0
+          ? Math.round((approvedHours / estimatedHours) * 100)
+          : 0;
         return {
           id: project.id,
           name: project.name,
-          estimated_hours: project.estimated_hours,
-          approved_hours: Math.round(project.approved_hours * 100) / 100,
+          estimated_hours: estimatedHours,
+          approved_hours: Math.round(approvedHours * 100) / 100,
           start_date: project.start_date,
           end_date: project.end_date,
           progress,
-          overEstimated: project.approved_hours > project.estimated_hours, // New property
+          overEstimated: approvedHours > estimatedHours,
         };
       });
 
@@ -94,9 +101,9 @@ export function ProjectsList({
   }, []);
 
   return (
-    <Card className="bg-white/10 border-4">
+    <Card className="bg-background dark:border-none dark:shadow-gray-950">
       <CardHeader>
-        <CardTitle className="text-xl font-semibold text-gradient">
+        <CardTitle className="text-xl font-semibold">
           Active Projects
         </CardTitle>
       </CardHeader>
@@ -107,40 +114,40 @@ export function ProjectsList({
               key={project.id}
               className={`flex items-center justify-between p-4 rounded-lg transition-colors cursor-pointer ${
                 selectedProjectId === project.id
-                  ? "bg-black/10 hover:bg-black/15"
-                  : "bg-white/5 hover:bg-white/10"
+                  ? "bg-accent hover:opacity-90"
+                  : "hover:bg-accent"
               }`}
               onClick={() => onProjectSelect(project)}
             >
               <div>
                 <h3
                   className={`font-medium ${
-                    project.overEstimated ? "text-gray-800" : "text-gray-800"
+                    project.overEstimated ? "text-red-600" : ""
                   }`}
                 >
                   {project.name}
                 </h3>
                 <div className="flex items-center gap-2 mt-1">
-                  <span className="text-sm text-gray-500">
+                  <span className="text-sm text-gray-600 dark:text-secondary">
                     Estimated Hours: {project.estimated_hours}
                   </span>
-                  <span className="text-sm text-gray-400">•</span>
+                  <span className="text-sm text-gray-600 dark:text-secondary">•</span>
                   <span
                     className={`text-sm ${
-                      project.overEstimated ? "text-gray-800" : "text-gray-500"
+                      project.overEstimated ? "text-red-600" : "text-gray-500 dark:text-secondary"
                     }`}
                   >
                     Approved Hours: {project.approved_hours}
                   </span>
-                  <span className="text-sm text-gray-400">•</span>
-                  <span className="text-sm text-gray-500">
+                  <span className="text-sm text-gray-600 dark:text-secondary">•</span>
+                  <span className="text-sm text-gray-600 dark:text-secondary">
                     Start Date:{" "}
                     {new Date(project.start_date).toLocaleDateString()}
                   </span>
                   {project.end_date && (
                     <>
-                      <span className="text-sm text-gray-400">•</span>
-                      <span className="text-sm text-gray-500">
+                      <span className="text-sm text-gray-600 dark:text-secondary">•</span>
+                      <span className="text-sm text-gray-600 dark:text-secondary">
                         End Date:{" "}
                         {new Date(project.end_date).toLocaleDateString()}
                       </span>
@@ -148,20 +155,20 @@ export function ProjectsList({
                   )}
                 </div>
                 <div className="flex items-center gap-4 mt-2">
-                  <div className="w-32 h-2 bg-gray-200 rounded-full overflow-hidden">
+                  <div className="w-32 h-2 bg-gray-200 dark:bg-secondaryBackground rounded-full overflow-hidden">
                     <div
                       className="h-full"
                       style={{
                         width: `${Math.min(project.progress, 100)}%`,
                         backgroundColor: project.overEstimated
-                          ? "#DC2626" 
-                          : "linear-gradient(to right, black, #2D3748)",
+                          ? "#DC2626"
+                          : "var(--progress)",
                       }}
                     />
                   </div>
                   <span
                     className={`text-sm font-medium ${
-                      project.overEstimated ? "text-red-600" : "text-gray-600"
+                      project.overEstimated ? "text-red-600" : "text-600 dark:text-secondary"
                     }`}
                   >
                     {project.progress}%
@@ -178,22 +185,12 @@ export function ProjectsList({
         </div>
         <div className="mt-8">
           <CardHeader>
-            <CardTitle className="text-xl font-semibold text-gradient">
+            <CardTitle className="text-xl font-semibold">
               Estimated Hours Distribution:
             </CardTitle>
           </CardHeader>
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
-              <defs>
-                <linearGradient id="pieGradient1" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#666666" stopOpacity={0.9} />
-                  <stop offset="95%" stopColor="#000000" stopOpacity={0.4} />
-                </linearGradient>
-                <linearGradient id="pieGradient2" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#999999" stopOpacity={0.9} />
-                  <stop offset="95%" stopColor="#555555" stopOpacity={0.4} />
-                </linearGradient>
-              </defs>
               <Pie
                 data={projects}
                 dataKey="estimated_hours"
@@ -211,7 +208,7 @@ export function ProjectsList({
                 {projects.map((_, index) => (
                   <Cell
                     key={`cell-${index}`}
-                    fill={`url(#pieGradient${index % 2 === 0 ? 1 : 2})`}
+                    fill={index % 2 === 0 ? "#666666" : "#999999"}
                   />
                 ))}
               </Pie>

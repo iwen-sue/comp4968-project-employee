@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Clock, PieChart, LogOut } from "lucide-react";
@@ -9,6 +9,7 @@ import { BurnDownChart } from "./burn-down-chart";
 import { ProjectReports } from "./project-reports";
 import { EmployeeProjectHours } from "./employee-project-hours";
 import { ProjectAllocation } from "./project-allocation";
+import { UserNotification } from "@/components/dashboard/user-notification";
 import CreateProject from "@/components/project/create-project";
 import refreshTokens from "@/actions/refresh-token";
 import moment from "moment";
@@ -134,11 +135,11 @@ export function DashboardPage({
 
     // Predefined colors for projects
     const colorPalette = [
-      "#FF5733",
-      "#33FF57",
-      "#3357FF",
-      "#F333FF",
-      "#FF33A1",
+      "var(--custom-red)",
+      "var(--custom-blue)",
+      "var(--custom-yellow)",
+      "var(--custom-green)",
+      "var(--custom-purple)",
     ];
     let colorIndex = 0;
 
@@ -225,32 +226,38 @@ export function DashboardPage({
     }
   }, [showTimesheetForm]);
 
+  const navigateToTimesheets = (start_date_of_the_week: Date) => {
+    notificationDate.current = start_date_of_the_week
+    setShowTimesheetForm(true)
+  }
+
   if (showTimesheetForm) {
     return (
-      <div className="p-6 mb-80">
+      <div className="pt-6 mb-80">
         <div className="flex items-center gap-4 mb-6">
           <Button
-            variant="outline"
+            variant="secondary"
             onClick={() => setShowTimesheetForm(false)}
-            className="bg-white/50"
+            className="hover:bg-accent"
           >
             Back to Dashboard
           </Button>
-          <h1 className="text-3xl font-bold text-gradient">New Timesheet</h1>
+          {/* <h1 className="text-3xl font-bold text-foreground">New Timesheet</h1> */}
         </div>
-        <TimesheetTable employee_id={userId} />
+        <TimesheetTable employee_id={userId} notificationDate={notificationDate} />
       </div>
     );
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="pt-6 space-y-6">
+      <UserNotification navigateToTimesheets={navigateToTimesheets}/>
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-4">
-          <h1 className="text-3xl font-bold text-gradient">Dashboard</h1>
+          <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
           {userRole === "worker" && (
             <Button
-              className="bg-gradient-to-r from-grey-800 via-gray-800 to-black"
+              className="bg-primary hover:opacity-95"
               onClick={() => setShowTimesheetForm(true)}
             >
               New Timesheet
@@ -261,14 +268,14 @@ export function DashboardPage({
               <Button
                 variant={activeView === 'overview' ? 'default' : 'outline'}
                 onClick={() => setActiveView('overview')}
-                className={activeView === 'overview' ? 'bg-black' : 'bg-white/50'}
+                className={activeView === 'overview' ? 'bg-secondary' : 'bg-secondaryBackground'}
               >
                 Overview
               </Button>
               <Button
                 variant={activeView === 'reports' ? 'default' : 'outline'}
                 onClick={() => setActiveView('reports')}
-                className={activeView === 'reports' ? 'bg-black' : 'bg-white/50'}
+                className={activeView === 'reports' ? 'bg-secondary' : 'bg-secondaryBackground'}
               >
                 Reports
               </Button>
@@ -276,7 +283,7 @@ export function DashboardPage({
               <Button
                 variant={activeView === 'allocation' ? 'default' : 'outline'}
                 onClick={() => setActiveView('allocation')}
-                className={activeView === 'allocation' ? 'bg-black' : 'bg-white/50'}
+                className={activeView === 'allocation' ? 'bg-secondary' : 'bg-secondaryBackground'}
               >
                 Project Allocation
               </Button>
@@ -294,7 +301,7 @@ export function DashboardPage({
         <Button
           variant="outline"
           onClick={onSignOut}
-          className="bg-white/50 hover:bg-white/80"
+          className="bg-background"
         >
           <LogOut className="w-4 h-4 mr-2" />
           Sign out
@@ -305,32 +312,32 @@ export function DashboardPage({
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* ... Cards ... */}
-            <Card className="bg-white/10 border-0">
+            <Card className="bg-background border-0 dark:shadow-gray-950">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-gray-600">
+                <CardTitle className="text-sm font-medium text-gray-600 dark:text-secondary">
                   Hours Last 14 Days
                 </CardTitle>
-                <Clock className="h-4 w-4 text-black" />
+                <Clock className="h-4 w-4 =" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{hoursLast14Days}</div>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-gray-500 dark:text-secondary dark:opacity-60">
                   {hoursDifference > 0 ? "+" : ""}
                   {hoursDifference} from previous 14 days
                 </p>
               </CardContent>
             </Card>
 
-            <Card className="bg-white/10 border-0">
+            <Card className="bg-background border-0 dark:shadow-gray-950">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-gray-600">
+                <CardTitle className="text-sm font-medium text-gray-600 dark:text-secondary">
                   Active Projects
                 </CardTitle>
-                <PieChart className="h-4 w-4 text-black" />
+                <PieChart className="h-4 w-4 " />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{activeProjects}</div>
-                <p className="text-xs text-gray-500">Currently assigned</p>
+                <p className="text-xs text-gray-500 dark:text-secondary dark:opacity-60">Currently assigned</p>
               </CardContent>
             </Card>
           </div>

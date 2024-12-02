@@ -43,6 +43,7 @@ import refreshTokens from "@/actions/refresh-token";
 
 type TimesheetProps = {
   employee_id: string;
+  notificationDate: React.MutableRefObject<Date | null>;
 };
 
 type DayHours = {
@@ -353,10 +354,11 @@ const deleteTimesheetEntry = async (entryId: string): Promise<void> => {
   console.log("Deleted entry:", entryId);
 };
 
-export function TimesheetTable({ employee_id }: TimesheetProps) {
+export function TimesheetTable({ employee_id, notificationDate }: TimesheetProps) {
   const [timesheet, setTimesheet] = useState<TimesheetEntry[]>([]);
   const [availableProjects, setAvailableProjects] = useState<Project[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
+  const [isEntryDisabled, setIsEntryDisabled] = useState<boolean>(false);
   const [selectedCell, setSelectedCell] = useState<{
     entryId: string | null;
     day: keyof DayHours | null;
@@ -372,8 +374,14 @@ export function TimesheetTable({ employee_id }: TimesheetProps) {
   const currentWeek = startOfWeek(today, { weekStartsOn: 1 });
 
   useEffect(() => {
+    if (notificationDate.current) {
+      setCurrentWeekStart(notificationDate.current);
+    }
+  }, []);
+
+  useEffect(() => {
     const fetchData = async () => {
-      const data = await fetchTimesheetData(employee_id, currentWeekStart);
+      const data = await fetchTimesheetData(employee_id, notificationDate.current ?? currentWeekStart);
       const projectData = await fetchProjectData(employee_id);
       setTimesheet(data);
       setAvailableProjects(projectData);
@@ -387,7 +395,12 @@ export function TimesheetTable({ employee_id }: TimesheetProps) {
       } else {
         setIsSubmitting(false);
       }
+
+      if (notificationDate.current === currentWeekStart) {
+        notificationDate.current = null;
+      }
     };
+
     fetchData();
   }, [currentWeekStart, employee_id]);
 
@@ -413,7 +426,7 @@ export function TimesheetTable({ employee_id }: TimesheetProps) {
     setEndTime(timeRecord?.end_time || "");
     const isDisabled =
       entry?.status === "pending" || entry?.status === "approved";
-    setIsSubmitting(isDisabled); // Reuse isSubmitting state to disable inputs
+    setIsEntryDisabled(isDisabled);
   };
 
   const handleSaveTime = async () => {
@@ -583,8 +596,9 @@ export function TimesheetTable({ employee_id }: TimesheetProps) {
   const isCurrentWeek = isBefore(currentWeekStart, addWeeks(currentWeek, 1));
 
   return (
-    <div className="space-y-4 border border-gray-200 rounded-lg shadow-md p-6">
-      <div className="flex justify-end mb-4">
+    <div className="space-y-4 rounded-lg shadow-md p-6 bg-background">
+      <div className="flex justify-between mb-4 items-baseline">
+        <h1 className="font-bold">Timesheet</h1>
         <div className="flex items-center space-x-2">
           <Button
             variant="outline"
@@ -612,21 +626,21 @@ export function TimesheetTable({ employee_id }: TimesheetProps) {
       <Table>
         <TableCaption>Weekly Timesheet</TableCaption>
         <TableHeader>
-          <TableRow className="bg-gray-200">
-            <TableHead>Project</TableHead>
+          <TableRow className="bg-secondary dark:bg-accent dark:border-none">
+            <TableHead className="font-bold">Project</TableHead>
             {days.map((day) => (
-              <TableHead key={day} className="text-center">
+              <TableHead key={day} className="text-center font-bold">
                 {day}
               </TableHead>
             ))}
-            <TableHead>Total Hours</TableHead>
-            <TableHead className="text-center">Status</TableHead>
-            <TableHead className="w-[50px]">Actions</TableHead>
+            <TableHead className="font-bold">Total Hours</TableHead>
+            <TableHead className="text-center font-bold">Status</TableHead>
+            <TableHead className="w-[50px] font-bold">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {timesheet.map((entry) => (
-            <TableRow key={entry.id} className="hover:bg-gray-100">
+            <TableRow key={entry.id} className=" hover:bg-secondaryBackground dark:border-input">
               <TableCell>{entry.project_name}</TableCell>
               {days.map((day) => (
                 <TableCell key={day}>
@@ -646,11 +660,11 @@ export function TimesheetTable({ employee_id }: TimesheetProps) {
                 <span
                   className={`px-2 py-1 rounded-full text-xs font-medium ${
                     entry.status === "pending"
-                      ? "bg-yellow-100 text-yellow-800" // Pending
+                      ? "bg-custom-yellow p-2 font-semibold" // Pending
                       : entry.status === "approved"
-                      ? "bg-green-100 text-green-800" // Approved
+                      ? "bg-custom-green p-2 font-semibold" // Approved
                       : entry.status === "rejected"
-                      ? "bg-red-100 text-red-800" // Rejected
+                      ? "bg-custom-red p-2 font-semibold" // Rejected
                       : "" // Fallback for unknown status
                   }`}
                 >
@@ -675,7 +689,7 @@ export function TimesheetTable({ employee_id }: TimesheetProps) {
             </TableRow>
           ))}
         </TableBody>
-        <TableFooter className=" border-gray-300">
+        <TableFooter className=" border-gray-300 dark:border-input dark:border-t-2">
           <TableRow>
             <TableCell>Daily Total</TableCell>
             {days.map((day) => (
@@ -721,8 +735,7 @@ export function TimesheetTable({ employee_id }: TimesheetProps) {
         {isSubmitting ? (
           <Button
             onClick={handleSubmitForApproval}
-            variant="outline"
-            className="border-black"
+            className="border-black hover:opacity-95"
           >
             <Check className="mr-2 h-4 w-4" /> Submit for Approval
           </Button>
@@ -752,7 +765,7 @@ export function TimesheetTable({ employee_id }: TimesheetProps) {
                   setStartTime(e.target.value)
                 }
                 className="col-span-3"
-                disabled={isSubmitting}
+                disabled={isEntryDisabled}
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
@@ -767,12 +780,12 @@ export function TimesheetTable({ employee_id }: TimesheetProps) {
                   setEndTime(e.target.value)
                 }
                 className="col-span-3"
-                disabled={isSubmitting}
+                disabled={isEntryDisabled}
               />
             </div>
           </div>
           <DialogFooter>
-            <Button onClick={handleSaveTime} disabled={isSubmitting}>
+            <Button onClick={handleSaveTime} disabled={isEntryDisabled}>
               Save
             </Button>
           </DialogFooter>

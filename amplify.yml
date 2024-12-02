@@ -1,0 +1,23 @@
+version: 1
+frontend:
+  phases:
+    preBuild:
+      commands:
+        - pwd
+        - ls -la
+        - cd app
+        - pwd
+        - ls -la
+        - npm install
+    build:
+      commands:
+        - pwd
+        - ls -la
+        - npm run build
+  artifacts:
+    baseDirectory: app/dist
+    files:
+      - '**/*'
+  cache:
+    paths:
+      - app/node_modules/**/*

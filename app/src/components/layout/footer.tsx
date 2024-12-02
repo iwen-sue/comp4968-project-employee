@@ -2,11 +2,11 @@ export function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="w-full bg-gray-900 text-white">
+    <footer className="w-full bg-secondaryBackground text-foreground">
       <div className="container py-4 px-4 sm:px-6 lg:px-8">
         <div className="text-center space-y-4">
-          <h3 className="text-2xl font-bold">
-            <span className="bg-gradient-to-r from-indigo-400 to-purple-500 text-transparent bg-clip-text">
+          <h3 className="text-2xl font-bold mt-4">
+            <span className="bg-clip-text text-primary">
               TimeTrack
             </span>
           </h3>
