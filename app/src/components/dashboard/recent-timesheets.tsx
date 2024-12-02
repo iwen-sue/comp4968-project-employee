@@ -98,7 +98,7 @@ export function RecentTimesheets() {
     navigate("/approve-timesheets");
   };
 
-  const bellIconStyle = hasNotifications ? "text-red-500" : "text-gray-500";
+  const bellIconStyle = hasNotifications ? "text-red-500" : "text-gray-500 dark:text-white";
 
   return (
     <Card className="bg-background dark:border-none dark:shadow-gray-950">
