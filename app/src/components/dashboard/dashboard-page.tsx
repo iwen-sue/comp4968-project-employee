@@ -101,6 +101,7 @@ export function DashboardPage({
   const [projectDetails, setProjectDetails] = useState<ProjectDetails[]>([]);
   const [hoursLast14Days, setHoursLast14Days] = useState<number>(0);
   const [hoursDifference, setHoursDifference] = useState<number>(0);
+  const notificationDate = useRef<Date | null>(null);
   const navigate = useNavigate();
 
   const userId =
