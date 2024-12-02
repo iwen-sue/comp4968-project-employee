@@ -43,7 +43,7 @@ exports.handler = async (event) => {
     };
 
     for (const user of users) {
-        const deleteResult = deleteUserFromOrganization(organizationId, user.user_id);
+        const deleteResult = await deleteUserFromOrganization(organizationId, user.user_name);
       if (deleteResult) {
         results.successful.push({
           ...user
