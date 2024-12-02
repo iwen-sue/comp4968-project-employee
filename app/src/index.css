@@ -108,7 +108,7 @@
     background-color: var(--progress-bar);
   }
 
-  .rdp-root {
+  .rdp-root.bg-white {
     @apply text-black;
   }
 
