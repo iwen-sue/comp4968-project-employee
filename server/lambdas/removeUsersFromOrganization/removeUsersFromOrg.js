@@ -1,5 +1,5 @@
 const { pool } = require('./db');
-const { genericHeaders, protectedHeaders } = require('./headers');
+const { genericHeaders } = require('./headers');
 
 const deleteQuery = `
 WITH deleted AS (

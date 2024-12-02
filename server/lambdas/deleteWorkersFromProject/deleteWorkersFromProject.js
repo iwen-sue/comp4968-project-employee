@@ -45,7 +45,7 @@ exports.handler = async (event) => {
     };
 
     for (const worker of workers) {
-      const deleteResult = await addWorkerToProject(
+      const deleteResult = await deleteWorkerFromProject(
         projectId,
         worker.worker_id,
       );
